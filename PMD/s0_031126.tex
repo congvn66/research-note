@@ -1,0 +1,368 @@
+% !TEX program = pdflatex
+% Casual research scratchpad — brainstorm / log / notes
+% Compile: pdflatex -> biber -> pdflatex -> pdflatex
+% ============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage[most]{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage[
+  colorlinks=true,
+  linkcolor=gray!50!black,
+  urlcolor=gray!50!black,
+  citecolor=gray!50!black
+]{hyperref}
+\usepackage[backend=biber,style=numeric]{biblatex}
+\addbibresource{references.bib}
+
+% ---------- Casual header ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{\leftmark}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot{}
+
+% ---------- Section styles (light) ----------
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.4em}
+
+% ============================================================
+% Box style — left border, subtle background, no heavy frame
+% ============================================================
+\tcbset{
+  scratch/.style={
+    enhanced, breakable,
+    boxrule=0pt, leftrule=3pt, arc=1pt,
+    left=10pt, right=8pt, top=5pt, bottom=5pt,
+    colback=gray!4,
+    coltitle=black, colbacktitle=white,
+    fonttitle=\small\bfseries,
+    attach title to upper={\par\vspace{2pt}},
+  }
+}
+
+% ---------- Boxes ----------
+\newtcolorbox[auto counter]{idea}[2][]{
+  scratch, colframe=orange!55!gray,
+  title={idea \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{question}[2][]{
+  scratch, colframe=blue!45!gray,
+  title={question \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{paper}[2][]{
+  scratch, colframe=green!40!gray,
+  title={paper \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{tried}[2][]{
+  scratch, colframe=purple!40!gray,
+  title={tried \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{todo}[2][]{
+  scratch, colframe=red!45!gray,
+  title={todo \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{insight}[2][]{
+  scratch, colframe=cyan!40!gray,
+  title={insight \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{careful}[2][]{
+  scratch, colframe=orange!70!gray,
+  title={careful \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox{note}[1][]{
+  scratch, colframe=gray!50,
+  title={note}, #1
+}
+
+
+% ============================================================
+\begin{document}
+
+\begin{center}
+  {\Large\bfseries Research Notebook}\\[2pt]
+  {\small\itshape project name P \textperiodcentered\ cong \textperiodcentered\ \today}
+\end{center}
+\vspace{0.5em}
+
+\tableofcontents
+\newpage
+
+
+\section{Research Objective and Research Question}
+
+\subsection{Problem}
+
+In Policy Mirror Descent, we have the following subproblem:
+\[
+\pi_{t+1}(\cdot|s) = \arg\max_{p\in \Delta(A)}\{\eta\langle\mathcal{Q}^{\pi_t}(s, \cdot),p\rangle - \mathcal{D}_h(p, \pi_t(\cdot|s))\}.
+\]
+
+Choosing $h$ in the equation above determines the geometry of the subuproblem (process of optimizing policy).
+
+"Some" researches (have not confirmed yet) show that:
+\begin{itemize}
+    \item Some class of mirror maps guaranteed policy convergence.
+    \item Some other "conditions" guaranteed policy convergence.
+    \item \textbf{Legendre} property does not guaranteed policy convergence.
+    \item There is a counter example for policy non-convergence with non-decomposable mirror map (have not reviewed yet).
+\end{itemize}
+
+\begin{question}{Controlling convergence?}
+
+Can we control the "convergence" (more details in Section 2) of PMD through choosing mirror geometry? 
+\end{question}
+
+\subsection{Target}
+We wanted to build a family of mirror maps that is parameterized
+
+\[
+\mathcal{H}_{\Theta} = \{h_{\theta}: \theta \in \Theta\}.
+\]
+
+Every $h_{\theta}$ must be valid and produce a legal PMD subproblem (more on later literature). We can only change $\theta$ in the subproblem (change $h$). We need to find 2 regions of parameters:
+\[ 
+\Theta_{conv}, \Theta_{nonconv}
+\]
+
+such that:
+
+\[
+int(\Theta_{conv}) \neq \emptyset; int(\Theta_{nonconv}) \neq \emptyset 
+\]
+
+such that:
+
+\[
+\forall \theta \in \Theta_{conv}, \pi^{\theta}_t \longrightarrow \pi^{\theta}_{\infty} \in \Pi^*.
+\]
+
+with $\Pi^*$ is the set of all optimal policies for the given MDP and $\pi^{\theta}_t$ is the policy created by solving PMD subproblem using parameterized mirror map $h_\theta$ at time step $t$. And:
+
+\[
+\forall \theta \in \Theta_{nonconv}, \pi^{\theta}_t \text{ does not converge}.
+\]
+
+
+\subsection{Contribution to RL community}
+Develop convergence-aware mirror geometry selection for more stable policy optimization in reinforcement learning.
+
+\textbf{Primary objective}: Construct a valid parameterized family of mirror potentials for which the induced PMD algorithms exhibit robustly distinct policy-convergence behaviors over nonempty open regions of the parameter space.
+
+\textbf{Long-term objective}: Characterize the geometric and dynamical mechanisms responsible for the parameter-dependent convergence behavior, with the possibility of developing more general convergence criteria.
+
+\begin{note}
+"geometry selection" $\approx$ "learn and choose $\theta$".
+\end{note}
+
+\begin{note}
+Build a parameterized mirror potential family, determine mathematical condition that affect convergence behavior $\rightarrow$ Find regions of parameters with different behavior (may have more than 2 region with different behavior) $\rightarrow$ Quantitative convergence analysis $\rightarrow$ Design choosing algorithm.
+\end{note}
+
+\subsection{Research Question}
+\begin{question}{Finding and learning valid, parameter dependent mirror family}
+Can we characterize how the geometry of parameterized mirror potentials determines the convergence behavior of Policy Mirror Descent, and leverage this understanding to develop principled and stable policy optimization methods for reinforcement learning?
+\end{question}
+
+\begin{note}
+We focus on policy convergence, but we not gonna left out value convergence. More on the initial setting, we gonna use \textbf{single scalar} in $\mathbb{R}$ to be the parameter, but we will extend it to multiple parameters if we have enough theory and math foundation.
+\end{note}
+
+\newpage
+
+\section{Convergence Concept}
+\subsection{Policy Convergence}
+We have the policy space:
+
+\[
+\Pi = \prod_{s\in S}\Delta(A)
+\]
+
+at iteration $t$, PMD creates $\pi_t \in \Pi$.
+
+We use the distance between 2 policy as:
+
+\[
+d_{\Pi}(\pi, \pi') = \max_{s\in S}\|\pi(\cdot|s) - \pi'(\cdot|s)\|_1
+\]
+
+Then, a sequence of policies converges if:
+\[
+\exists \pi_{\infty}\in \Pi: \lim_{t\rightarrow \infty} d_{\Pi}(\pi_t, \pi_{\infty}) = 0.
+\]
+
+
+\begin{note}
+We need to confirm this later: with finite MDP, policy space is compact, then every sequence of polices has a limit point.
+\end{note}
+
+\subsection{Value Convergence}
+We have the vanilla value function as follows:
+\[
+V^{\pi}(s) = \mathbb{E}[\sum^{\infty}_{t=0}\gamma^tr(s_t,a_t)|s_0=s].
+\]
+
+Optimal value function:
+\[
+V^*(s) = \max_{\pi\in \Pi}V^{\pi}(s).
+\]
+
+We can now define value convergence to optimal value:
+\[
+\lim_{t\rightarrow \infty}\|V^{\pi_t} - V^*\|_{\infty} = 0.
+\]
+
+with $\|V^{\pi_t} - V^*\|_{\infty} = \max_{s\in S}|V^{\pi_t}(s) - V^*(s)|$.
+
+\subsection{Optimality}
+
+We define optimal policies set:
+
+\[
+\Pi^* = \{\pi \in \Pi: V^\pi(s) = V^*(s) \forall s \in S\}.
+\]
+
+A policy $\pi^*\in \Pi^*$ is called an optimal policy, and $|\Pi^*|>1$ (can be).
+
+\begin{note}
+Policy convergence at 2.1 can be convergence to some random policies, not necessarily converge to optimal policy. You have to remember that convergence to optimal policy is much stronger than general policy convergence.
+\end{note}
+
+\begin{note}
+If a seq of policies conv. to an optimal policy, then value is conv. But there're still some abnormal cases outhere: Policy div. (not conv. to be exact) but value conv; policy conv. but value div.
+
+Moreover, these criterion for convergence may change if we found other criterions on high quality/reviewed papers.
+\end{note}
+
+\newpage
+
+\section{Mathematical Setting}
+\subsection{Basic setting for RL}
+We use: finite discounted MDP, 2 actions, multiple state (finite, more than or equal to 2), reward is standardized into $[0,1]$, action-dependent transition (at least for some states): $P(\cdot|s, a_1)\neq P(\cdot|s,a_2)$, policy space is $\Pi = \Delta^n_2$ ($n$ states, 2 policies), no parameterized policy (at least for now).
+
+\subsection{Mirror family setting}
+We consider a family:
+\[
+\mathcal{H}_{\Theta} = \{h_{\theta}:\theta \in \Theta\}, \Theta \subseteq \mathbb{R}.
+\]
+
+Let $h_{\theta}(1-x, x) \equiv \overline{h}_{\theta}(x)$ and $h_{\theta}(x) := \overline{h}_{\theta}(x) $ Then the Bregman divergence is:
+
+\[
+\mathcal{D}_{h_{\theta}}(x,y) = h_{\theta}(x) - h_{\theta}(y) - h_{\theta}'(y)(x-y).
+\]
+
+The family above need to satisfy those conditions:
+\begin{itemize}
+    \item \textbf{Convexity}: $h_{\theta}$ is strictly convex. This for Bregman and let subproblem has unique solution;
+    \item \textbf{Regularity} $h_{\theta}$ is differentiable in rel-int of binary simplex (because we have 2 action, and Bregman has $h'_{\theta}$ right there);
+    \item \textbf{Non-negative Bregman} $D_{h_{\theta}}$ is non-negative and has value with point that in the feasible set (which is the policy space right now);
+    \item \textbf{Legendre} idk yet.
+    
+\end{itemize}
+
+\subsection{PMD update rules}
+
+We have exact PMD:
+
+\[
+\pi^{\theta}_{t+1}(\cdot|s) = \arg\max_{p\in \Delta_2}\{\eta\langle\mathcal{Q}^{\pi^{\theta}_t}(s, \cdot),p\rangle - \mathcal{D}_{h_{\theta}}(p, \pi_t^{\theta}(\cdot|s))\}.
+\]
+
+for convenience, we can write:
+\[
+\pi^{\theta}_{t+1} = T_{h_{\theta}, \eta_t}(\pi^{\theta}_t).
+\]
+
+Because our initial setting is quite... simple, and let $\pi^{\theta}(\cdot|s) = (1 - x^{\theta}_t(s), x^{\theta}_t(s)) $ then we can simplify the exact PMD update into:
+\[
+x^{\theta}_{t+1}(s) = \arg\max_{x\in [0,1]}\{\eta\Delta\mathcal{Q}^{\theta}_t(s)x - \mathcal{D}_{h_{\theta}}(x, x_t^{\theta}(s))\}.
+\]
+with
+\[
+\Delta\mathcal{Q}^{\theta}_t(s) = \mathcal{Q}^{\pi^\theta_t}(s,a_1) - \mathcal{Q}^{\pi^\theta_t}(s,a_0).
+\]
+
+\subsection{Learning rate and initialization}
+Fixed learning rate, policy initialization such that $x \le 1$.
+
+\begin{note}
+At this stage, we are still using same mirror map for every state, not state-dependent yet. We left state-dependent for later stages.
+\end{note}
+
+\section{Related Documents}
+
+\begin{enumerate}
+
+    \item \textbf{Xiao, L. (2022).}
+    \textit{On the Convergence Rates of Policy Gradient Methods.}
+    Journal of Machine Learning Research, 23(282), 1--36.
+
+    \url{https://jmlr.org/papers/volume23/22-0056/22-0056.pdf}
+
+
+    \item \textbf{Lin, D., \& Zhang, Z. (2022).}
+    \textit{On the Convergence of Policy in Unregularized
+    Policy Mirror Descent.}
+
+    arXiv preprint arXiv:2205.08176.
+
+    \url{https://arxiv.org/abs/2205.08176}
+
+
+    \item \textbf{Li, Y., Lan, G., \& Zhao, T. (2024).}
+    \textit{Homotopic Policy Mirror Descent: Policy Convergence,
+    Algorithmic Regularization, and Improved Sample Complexity.}
+    Mathematical Programming, 207, 457--513.
+
+    \url{https://doi.org/10.1007/s10107-023-02017-4}
+
+    \item \textbf{Li, W., \& Wei, K. (2026a).}
+    \textit{On the Policy Convergence of Policy Mirror
+    Descent Methods.}
+
+    arXiv preprint arXiv:2607.11626.
+
+    \url{https://arxiv.org/abs/2607.11626}
+
+
+    \item \textbf{Li, W., \& Wei, K. (2026b).}
+    \textit{Does Policy Mirror Descent Converge in Policy
+    with Non-Decomposable Mirror Maps? A Counterexample.}
+
+    arXiv preprint arXiv:2610.19853.
+
+    \url{https://arxiv.org/abs/2610.19853}
+
+
+    \item \textbf{Li, W., Liu, J., \& Wei, K. (2025).}
+    \textit{$\phi$-Update: A Class of Policy Update Methods
+    with Policy Convergence Guarantee.}
+    International Conference on Learning Representations
+    (ICLR 2025).
+
+    \url{https://proceedings.iclr.cc/paper_files/paper/2025/hash/1978afed95ab969e0c3bd9b159493d4b-Abstract-Conference.html}
+
+    \item \textbf{Alfano, C., Towers, S., Sapora, S.,
+    Lu, C., \& Rebeschini, P. (2025).}
+    \textit{Learning Mirror Maps in Policy Mirror Descent.}
+    International Conference on Learning Representations
+    (ICLR 2025).
+
+    \url{https://proceedings.iclr.cc/paper_files/paper/2025/file/414f4c9fe9653e5de98fad6964d50315-Paper-Conference.pdf}
+
+\end{enumerate}
+
+\end{document}
