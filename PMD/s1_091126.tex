@@ -1,0 +1,161 @@
+% !TEX program = pdflatex
+% Casual research scratchpad — brainstorm / log / notes
+% Compile: pdflatex -> biber -> pdflatex -> pdflatex
+% ============================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage[most]{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage[
+  colorlinks=true,
+  linkcolor=gray!50!black,
+  urlcolor=gray!50!black,
+  citecolor=gray!50!black
+]{hyperref}
+\usepackage[backend=biber,style=numeric]{biblatex}
+\addbibresource{references.bib}
+
+% ---------- Casual header ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{\leftmark}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot{}
+
+% ---------- Section styles (light) ----------
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.7em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.4em}
+
+% ============================================================
+% Box style — left border, subtle background, no heavy frame
+% ============================================================
+\tcbset{
+  scratch/.style={
+    enhanced, breakable,
+    boxrule=0pt, leftrule=3pt, arc=1pt,
+    left=10pt, right=8pt, top=5pt, bottom=5pt,
+    colback=gray!4,
+    coltitle=black, colbacktitle=white,
+    fonttitle=\small\bfseries,
+    attach title to upper={\par\vspace{2pt}},
+  }
+}
+
+% ---------- Boxes ----------
+\newtcolorbox[auto counter]{idea}[2][]{
+  scratch, colframe=orange!55!gray,
+  title={idea \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{question}[2][]{
+  scratch, colframe=blue!45!gray,
+  title={question \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{paper}[2][]{
+  scratch, colframe=green!40!gray,
+  title={paper \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{tried}[2][]{
+  scratch, colframe=purple!40!gray,
+  title={tried \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{todo}[2][]{
+  scratch, colframe=red!45!gray,
+  title={todo \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{insight}[2][]{
+  scratch, colframe=cyan!40!gray,
+  title={insight \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox[auto counter]{careful}[2][]{
+  scratch, colframe=orange!70!gray,
+  title={careful \thetcbcounter\ \textperiodcentered\ #2}, #1
+}
+\newtcolorbox{note}[1][]{
+  scratch, colframe=gray!50,
+  title={note}, #1
+}
+
+
+% ============================================================
+\begin{document}
+
+\begin{center}
+  {\Large\bfseries Research Notebook}\\[2pt]
+  {\small\itshape Xiao's paper \textperiodcentered\ cong \textperiodcentered\ \today}
+\end{center}
+\vspace{0.5em}
+
+\tableofcontents
+\newpage
+
+\section{Main results from Xiao}
+
+\subsection{Settings}
+
+Those are the initial settings of the problem of PMD in the paper:
+
+\begin{itemize}
+    \item finite state/action space.
+    \item discount factor in $[0,1)$.
+    \item regret minimization instead of reward maximization. And reward in $[0,1]$.
+    \item Objective: minimize $V_{\rho}(\pi)$ with $\rho$ is the initial state distribution.
+\end{itemize}
+
+These are assumption for mirror map $h$ of PMD, which is Legendre type:
+
+\begin{itemize}
+    \item (Strictly convex) $h$ is strictly convex on the relative interior of $h$.
+    \item (Essentially smooth) $h$ is differentiable on the relative interior, but gradient goes to infinity when go to the border of the domain of $h$. 
+\end{itemize}
+
+We still need one more thing:
+\[
+rint(dom (h))\cap \Delta(A) \neq \emptyset.
+\]
+
+with $\Delta(A)$ is the domain that we working on (policy space), not the domain of $h$.
+
+In Legendre, (Strictly convex) assure Bregman distance is greater than 0 and let the subproblem is strictly convex. About (Essentially smooth), it assure that we always stand in the relative interior of $h$, where the gradient is determined (this especially useful for entropy mirror map).
+
+\subsection{Exact Policy Mirror Descent}
+See eq (37) in the paper for detail.
+
+\subsection{Results}
+
+\textbf{Sublinear convergence}:
+For constant step size and using the setting mentioned in 1.1, PMD converges with the rate of $\mathcal{O}(\frac{1}{k})$.
+
+\textbf{Linear convergence}:
+With geometrically increasing step size (see eq (52) for more detail) and finite distribution mismatch (see eq (51)), PMD converges linearly.
+
+
+\begin{note}
+Note that, convergence mentioned until now is convergence in value, not policy.
+\end{note}
+
+\newpage
+
+\section{Comments and Ideas}
+
+As you may see, if we use a function in a Legendre type, we end up in value convergence no matter what. Moreover, the paper didn't tell us much about policy convergence (not too rigorous).
+
+\begin{idea}{Value non-convergence}
+One attempt to attack the non-convergence of value in PMD, we can play with (Strictly convex) of Legendre conditions. According to Section 1.1, (Strictly convex) assures Bregman is greater than 0 and let the PMD subproblem is strictly convex. We will try to parameterize the mirror map, such that in a region, it will be not strictly convex (non-convex to be exact), then the PMD subproblem will be non-convex, and the value \textbf{may not} converge (I guess so); and the other region will let the function be strictly convex? Then it will be Legendre, PMD will run as usual (we will try to keep (Essentially smooth) right now). However, I still expect that the "valid" region will contain both $L_2$ and KL case. This may be trivial, idk.
+\end{idea}
+
+\begin{idea}{Loosen assumption of PMD?}
+I think there is a open direction, we can let the mirror map be PL, not strictly convex anymore. This leads to the problem of "no descent" in PMD, and a lot of things. Then we will need other condition to control Bregman, etc. But the new assumption must be looser than the initial assumption in Xiao.
+\end{idea}
+\end{document}
